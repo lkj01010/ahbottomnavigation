@@ -561,7 +561,8 @@ public class AHBottomNavigation extends FrameLayout {
 				width = (int) (itemWidth * 1.16);
 			}
 
-			LayoutParams params = new LayoutParams(width, (int) height);
+//			LayoutParams params = new LayoutParams(width, (int) height);
+			LayoutParams params = new LayoutParams(width, (int) 200);
 			linearLayout.addView(view, params);
 			views.add(view);
 		}
