@@ -76,6 +76,7 @@ public class AHBottomNavigation extends FrameLayout {
 	private Context context;
 	private Resources resources;
 	private ArrayList<AHBottomNavigationItem> items = new ArrayList<>();
+	private AHBottomNavigationItem midItem;
 	private ArrayList<View> views = new ArrayList<>();
 	private AHBottomNavigationBehavior<AHBottomNavigation> bottomNavigationBehavior;
 	private View backgroundColorView;
@@ -214,6 +215,7 @@ public class AHBottomNavigation extends FrameLayout {
 
 		ViewCompat.setElevation(this, resources.getDimension(R.dimen.bottom_navigation_elevation));
 		setClipToPadding(false);
+		setClipChildren(false);
 
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, bottomNavigationHeight);
@@ -245,6 +247,7 @@ public class AHBottomNavigation extends FrameLayout {
 		LinearLayout linearLayout = new LinearLayout(context);
 		linearLayout.setOrientation(LinearLayout.HORIZONTAL);
 		linearLayout.setGravity(Gravity.CENTER);
+		linearLayout.setClipChildren(false);
 
 		LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, layoutHeight);
 		addView(linearLayout, layoutParams);
@@ -347,7 +350,7 @@ public class AHBottomNavigation extends FrameLayout {
 			return;
 		}
 
-		float itemWidth = layoutWidth / items.size();
+		float itemWidth = (midItem == null) ? layoutWidth / items.size() : layoutWidth / (items.size()+1);
 		if (itemWidth < minWidth) {
 			itemWidth = minWidth;
 		} else if (itemWidth > maxWidth) {
@@ -367,6 +370,26 @@ public class AHBottomNavigation extends FrameLayout {
 		}
 
 		for (int i = 0; i < items.size(); i++) {
+
+			// add mid item
+			if (midItem != null && i == items.size() / 2) {
+				View view = inflater.inflate(R.layout.bottom_navigation_mid_item, this, false);
+				ImageView icon = (ImageView) view.findViewById(R.id.bottom_navigation_mid_item_icon);
+				icon.setImageDrawable(midItem.getDrawable(context));
+//				icon.setImageDrawable(AHHelper.getTintDrawable(midItem.getDrawable(context),
+//						itemActiveColor, forceTint));
+
+				LayoutParams params = new LayoutParams((int)itemWidth, (int)height);
+				linearLayout.addView(view, params);
+				view.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						tabSelectedListener.onMidTabSelected();
+					}
+				});
+			}
+
+
 			final boolean current = currentItem == i;
 			final int itemIndex = i;
 			AHBottomNavigationItem item = items.get(itemIndex);
@@ -463,7 +486,7 @@ public class AHBottomNavigation extends FrameLayout {
 			return;
 		}
 
-		float itemWidth = layoutWidth / items.size();
+		float itemWidth = (midItem == null) ? layoutWidth / items.size() : layoutWidth / (items.size()+1);
 
 		if (itemWidth < minWidth) {
 			itemWidth = minWidth;
@@ -478,8 +501,26 @@ public class AHBottomNavigation extends FrameLayout {
 		itemWidth -= difference;
 		notSelectedItemWidth = itemWidth;
 
-
 		for (int i = 0; i < items.size(); i++) {
+
+			// add mid item
+			if (midItem != null && i == items.size() / 2) {
+				View view = inflater.inflate(R.layout.bottom_navigation_mid_item, this, false);
+				ImageView icon = (ImageView) view.findViewById(R.id.bottom_navigation_mid_item_icon);
+				icon.setImageDrawable(midItem.getDrawable(context));
+//				icon.setImageDrawable(AHHelper.getTintDrawable(items.get(i).getDrawable(context),
+//						itemActiveColor, forceTint));
+
+				LayoutParams params = new LayoutParams((int)itemWidth, (int)height);
+				linearLayout.addView(view, params);
+				view.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						tabSelectedListener.onMidTabSelected();
+					}
+				});
+			}
+
 
 			final int itemIndex = i;
 			AHBottomNavigationItem item = items.get(itemIndex);
@@ -561,8 +602,7 @@ public class AHBottomNavigation extends FrameLayout {
 				width = (int) (itemWidth * 1.16);
 			}
 
-//			LayoutParams params = new LayoutParams(width, (int) height);
-			LayoutParams params = new LayoutParams(width, (int) 200);
+			LayoutParams params = new LayoutParams(width, (int) height);
 			linearLayout.addView(view, params);
 			views.add(view);
 		}
@@ -924,6 +964,14 @@ public class AHBottomNavigation extends FrameLayout {
 			Log.w(TAG, "The items list should not have more than 5 items");
 		}
 		items.add(item);
+		createItems();
+	}
+
+	public void addMidItem(AHBottomNavigationItem item) {
+		if (this.items.size() > MAX_ITEMS) {
+			Log.w(TAG, "The items list should not have more than 5 items");
+		}
+		midItem = item;
 		createItems();
 	}
 
@@ -1508,6 +1556,7 @@ public class AHBottomNavigation extends FrameLayout {
 		 * @return boolean: true for updating the tab UI, false otherwise
 		 */
 		boolean onTabSelected(int position, boolean wasSelected);
+		void onMidTabSelected();
 	}
 
 	public interface OnNavigationPositionListener {
