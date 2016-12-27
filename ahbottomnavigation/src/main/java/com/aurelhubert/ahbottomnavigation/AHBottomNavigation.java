@@ -6,7 +6,9 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -117,6 +119,9 @@ public class AHBottomNavigation extends FrameLayout {
 	private int notificationActiveMarginLeft, notificationInactiveMarginLeft;
 	private int notificationActiveMarginTop, notificationInactiveMarginTop;
 
+	// paint
+	private Paint paint;
+
 	/**
 	 * Constructors
 	 */
@@ -183,6 +188,7 @@ public class AHBottomNavigation extends FrameLayout {
 	private void init(Context context, AttributeSet attrs) {
 		this.context = context;
 		resources = this.context.getResources();
+		paint = new Paint();
 
 		if (attrs != null) {
 			TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.AHBottomNavigationBehavior_Params, 0, 0);
@@ -213,13 +219,25 @@ public class AHBottomNavigation extends FrameLayout {
 		notificationActiveMarginTop = (int) resources.getDimension(R.dimen.bottom_navigation_notification_margin_top_active);
 		notificationInactiveMarginTop = (int) resources.getDimension(R.dimen.bottom_navigation_notification_margin_top);
 
-		ViewCompat.setElevation(this, resources.getDimension(R.dimen.bottom_navigation_elevation));
+		// lkj:note: 这句话导致这个layout始终在兄弟layout的上层,删除之,取而代之设置topborder
+//		ViewCompat.setElevation(this, resources.getDimension(R.dimen.bottom_navigation_elevation));
 		setClipToPadding(false);
 		setClipChildren(false);
 
 		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, bottomNavigationHeight);
 		setLayoutParams(params);
+	}
+
+	@Override
+	protected void onDraw(Canvas canvas) {
+		paint.setColor(0xFFEAEAEA);
+
+		int width = this.getWidth();
+		int height = this.getHeight();
+
+		canvas.drawLine(0, 0, width, 0, paint);
+		super.onDraw(canvas);
 	}
 
 	/**
